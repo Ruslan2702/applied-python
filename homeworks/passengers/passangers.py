@@ -63,7 +63,6 @@ def process(data, events, car):
         else:
             return -1
 
-    num = 0
     for train, cars in cars_list.items():
         if car in cars:
             index_in_cars = cars.index(car)
