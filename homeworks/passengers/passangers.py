@@ -9,12 +9,6 @@ def process(data, events, car):
     car_dict = OrderedDict()    # ключами являются номера вагонов, а значениями - количество пассажиров
     all_passengers = {} # Для хранения имен всех пассажиров и определения их поезда и вагона
     cars_list = OrderedDict() # Для итерации по вагонам
-    # data - массив поездов
-    # data[1] - словарь с 2мя ключами: 'cars' и 'name'
-    # data[1]['cars'] - массив, элементами которого являются словари:
-    # data[1]['cars'][1] - словарь с ключами 'name'(значение - название вагона сi) и 'people'
-    # data[1]['cars'][1]['people'] - массив имен пассажиров'
-    # data[1]['name'] - название поезда (А, В...)
 
     for i in range(len(data)):  # Цикл по поездам data[i]
         trains_dict[data[i]['name']] = []
@@ -25,22 +19,12 @@ def process(data, events, car):
             cars_list[data[i]['name']].append(data[i]['cars'][j]['name'])
             for k in range(len(data[i]['cars'][j]['people'])):
                 all_passengers[data[i]['cars'][j]['people'][k]] = [data[i]['name'], data[i]['cars'][j]['name']]
-    # events - массив событий
-    # events[i] - i-е событие, словарь с несколькими ключами:
-    # если events[i]['type'] == 'walk', то в этом словаре еще 2 ключа:
-            # events[i]['passenger'] - имя пассажира
-            # events[i]['distance'] - количество вагонов, на которое он перемещается ('+' идет к хвосту)
-    # если events[i]['type'] == 'switch', то в этом словаре еще 3 ключа:
-            # events[i]['cars'] - количество вагонов
-            # events[i]['train_from'] - название поезда(А, В), от которого отцепляют вагоны
-            # events[i]['train_to'] - название поезда(А, В), к которому прицепляют вагоны
 
     for i in range(len(events)):
         if events[i]['type'] == "walk":
             # Проверяем, существует ли такой пассажир
             if events[i]['passenger'] not in all_passengers: 
                 return -1
-            # print(trains_dict)
             passenger = events[i]['passenger']
             distance = events[i]['distance']
             train_number = all_passengers[passenger][0]
@@ -86,5 +70,4 @@ def process(data, events, car):
     for train, cars in cars_list.items():
         if car in cars:
             index_in_cars = cars.index(car)
-            print(len(trains_dict[train][index_in_cars][car]))
             return len(trains_dict[train][index_in_cars][car])             
