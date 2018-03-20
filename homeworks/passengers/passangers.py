@@ -1,8 +1,5 @@
 # -*- encoding: utf-8 -*-
-import json
-from glob import glob
 from collections import OrderedDict
-# from passangers import process
 
 def process(data, events, car):
     trains_dict = OrderedDict()  # Ключи - буквы поездов, значения - массивы словарей (car_dict), в которых
