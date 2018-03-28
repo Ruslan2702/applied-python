@@ -2,6 +2,23 @@
 import re
 import collections
 import operator
+import datetime
+
+
+def check_date(line, start_at, stop_at):
+            regular_expression_for_request_date = r'\d{2}/\w{3,4}/\d{4}\s\d\d:\d\d:\d\d'
+            request_date_str = re.search(regular_expression_for_request_date, line).group()
+            month = re.findall(r'\w{2,4}', request_date_str)[1]
+            year = re.findall(r'\w{2,4}', request_date_str)[2]
+            request_date_str = request_date_str.replace(month, dict_month_name_to_val[month])
+            request_date_str = request_date_str.replace(year, year[2:])
+            request_datetime = datetime.datetime.strptime(request_date_str, "%d/%m/%y %H:%M:%S")
+            if request_datetime < start_at:
+                return False  
+            elif request_datetime > stop_at:
+                return False
+            else:
+                return True
 
 def parse(
     ignore_files=False,
@@ -15,35 +32,25 @@ def parse(
     regular_expression_for_request_str = r'://\S*\s'
     regular_expression_for_request_values = r'\d"\s\d{3}\s\d*'
     regular_expression_for_type_of_request = r'\b\w{3,4}\shttp'
-    regular_expression_for_request_date = r'\d{2}/\w{3,4}/\d{4}\s\d\d:\d\d:\d\d'
-
+    
     f = open('log.log', 'r')
-
+    
     dict_request_to_count = collections.defaultdict(int)
     dict_request_to_time = collections.defaultdict(int)
-
     dict_month_name_to_val = {
-        "Jan":1,
-        "Feb":2,
-        "Mar":3,
-        "Apr":4,
-        "May":5,
-        "June":6,
-        "July":7,
-        "Aug":8,
-        "Sept":9,
-        "Oct":10,
-        "Nov":11,
-        "Dec":12
+        "Jan":"1",
+        "Feb":"2",
+        "Mar":"3",
+        "Apr":"4",
+        "May":"5",
+        "June":"6",
+        "July":"7",
+        "Aug":"8",
+        "Sept":"9",
+        "Oct":"10",
+        "Nov":"11",
+        "Dec":"12"
     };
-
-    if start_at:
-        start_at_list = re.findall(r'\w{2,4}', start_at)
-        start_at_list[1] = dict_month_name_to_val(start_at_list[1])
-
-    if stop_at:
-        stop_at_list = re.findall(r'\w{2,4}', stop_at)
-        stop_at_list[1] = dict_month_name_to_val(stop_at_list[1])
 
     for line in f:
         request_string = re.search(regular_expression_for_request_str, line)
@@ -55,35 +62,9 @@ def parse(
             if type_of_request != request_type:
                 continue
 
-            request_date = re.search(regular_expression_for_request_date, line).group()
-            request_date_list = re.findall(r'\w{2,4}', request_date)
-
-            if start_at:
-                if request_date_list[2] < start_at_list[2]:  # Проверяем год
+            if start_at or stop_at:
+                if not check_date:
                     continue
-                elif request_date_list[1] < start_at_list[1]:  # Проверяем месяц
-                    continue
-                elif request_date_list[0] < start_at_list[0]:  # Проверяем день
-                    continue
-                elif request_date_list[3] < start_at_list[3]:  # Проверяем часы
-                    continue
-                elif request_date_list[4] < start_at_list[4]:  # Проверяем минуты
-                    continue
-                elif request_date_list[5] < start_at_list[5]:  # Проверяем секунды
-                    continue
-            if stop_at:
-                if request_date_list[2] > stop_at_list[2]:  # Проверяем год
-                    continue
-                elif request_date_list[1] > stop_at_list[1]:  # Проверяем месяц
-                    continue
-                elif request_date_list[0] > stop_at_list[0]:  # Проверяем день
-                    continue
-                elif request_date_list[3] > stop_at_list[3]:  # Проверяем часы
-                    continue
-                elif request_date_list[4] > stop_at_list[4]:  # Проверяем минуты
-                    continue
-                elif request_date_list[5] > stop_at_list[5]:  # Проверяем секунды
-                    continue                
 
             request_string = request_string.split('?')[0]
             if ignore_files:
