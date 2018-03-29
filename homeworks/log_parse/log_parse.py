@@ -6,15 +6,12 @@ import datetime
 
 
 def check_date(line, start_at, stop_at):
-            regular_expression_for_request_date = r'\d{2}/\w{3,4}/\d{4}\s\d\d:\d\d:\d\d'
-            request_date_str = re.search(regular_expression_for_request_date, line).group()
-            request_datetime = datetime.datetime.strptime(request_date_str, "%d/%b/%Y %H:%M:%S")
-            if request_datetime < start_at:
-                return False  
-            elif request_datetime > stop_at:
-                return False
-            else:
-                return True
+    regular_expression_for_request_date = r'\d{2}/\w{3,4}/\d{4}\s\d\d:\d\d:\d\d'
+    request_date_str = re.search(regular_expression_for_request_date, line).group()
+    request_datetime = datetime.datetime.strptime(request_date_str, "%d/%b/%Y %H:%M:%S")
+    if request_datetime < start_at or request_datetime > stop_at:
+       return False
+    return True
 
 
 def check_flags(line, request_string, request_type, ignore_files, ignore_urls, ignore_www):
