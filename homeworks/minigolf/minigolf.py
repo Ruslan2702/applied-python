@@ -54,17 +54,22 @@ class Match:
 
         return self._result_table
 
-    def get_winners(self, func):
+    def get_winners(self):
         if not self._finished:
             raise RuntimeError
 
-        max_min_score = func(self._player_to_score_dict.values())
+        max_min_score = self._func_for_get_winners(self._player_to_score_dict.values())
         for key, value in self._player_to_score_dict.items():
             if value == max_min_score:
                 for p in self._players_list:
                     if p.name == key:
                         self._winners_list.append(p)
         return self._winners_list
+
+    @abstractmethod
+    def _func_for_get_winners(self, args_list):
+        pass
+
 
 
 class HitsMatch(Match):
@@ -101,9 +106,8 @@ class HitsMatch(Match):
         if self._current_hole == self._H:
             self._finished = True
 
-    def get_winners(self):
-        return super().get_winners(min)
-
+    def _func_for_get_winners(self, args_list):
+        return min(args_list)
 
     def _if_end_of_circle(self):
         if self._current_player == self._current_hole % self._N:
@@ -122,6 +126,7 @@ class HitsMatch(Match):
                 self._number_of_circle = 0
                 self._is_player_scored = [False for i in range(self._N)]
                 self._players_score_on_current_hole = [0 for i in range(self._N)]
+
 
 
 class HolesMatch(Match):
@@ -156,5 +161,5 @@ class HolesMatch(Match):
         if self._current_hole == self._H:
             self._finished = True
 
-    def get_winners(self):
-        return super().get_winners(max)
+    def _func_for_get_winners(self, args_list):
+        return max(args_list)
