@@ -5,12 +5,10 @@ import socket
 
 import subprocess
 
-from server import run
-
 
 class ServerBaseTest(TestCase):
     def setUp(self):
-        self.server = subprocess.Popen(['python', 'server.py'])
+        self.server = subprocess.Popen(['python3', 'server.py'])
         # даем серверу время на запуск
         time.sleep(0.5)
 
@@ -20,7 +18,7 @@ class ServerBaseTest(TestCase):
 
     def send(self, command):
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(('127.0.0.1', 5555))
+        s.connect(('localhost', 5555))
         s.send(command)
         data = s.recv(1000000)
         s.close()
@@ -51,5 +49,5 @@ class ServerBaseTest(TestCase):
         self.assertEqual(b'NO', self.send(b'ACK 1 ' + second_task_id))
 
 
-if __name__ == '__main__':
-    unittest.main()
+# if __name__ == '__main__':
+#     unittest.main()
