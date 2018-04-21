@@ -29,8 +29,6 @@ def read_from_file():
     with open(file_name, 'rb') as f:
         q_all = pickle.load(f)
         q_status = pickle.load(f)
-        # print(q_all)
-        # print(q_status)
     return (q_all, q_status)
 
 def listen():
