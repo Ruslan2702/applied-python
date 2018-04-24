@@ -2,14 +2,11 @@ from unittest import TestCase
 import time
 import socket
 import subprocess
-file_name = 'MYLOG.txt'
 
 class ServerBaseTest(TestCase):
     def setUp(self):
         self.server = subprocess.Popen(['python3', 'server.py'])
         time.sleep(0.5)
-
-
 
     def tearDown(self):
         self.server.terminate()
@@ -46,10 +43,10 @@ class ServerBaseTest(TestCase):
         self.assertEqual(b'NO', self.m_send(b'ACK 1 ' + second_task_id))
 
     def _test_files(self):
-
-        # Чтобы запустить этот тест, нужно очистить файл MYLOG и закомментировать
-        # предыдущие тесты. Проблема в том, что для его проверки нужно убрать строки
-        # 19-23 из файла server.py, но без них упадут первые тесты.
+        # Чтобы запустить этот тест, нужно очистить файл LOGS.txt и закомментировать
+        # предыдущие тесты. Проблема в том, что для его проверки нужно отказаться
+        # от перезаписывания логов на каждом запуске сервера, но в таком случае
+        # падают тесты 1 и 2
         task_id = self.m_send(b'ADD 1 5 12345')
         self.server.terminate()
         self.server.wait()
