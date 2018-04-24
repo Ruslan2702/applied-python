@@ -8,6 +8,7 @@ class TcpServer:
     log_file = 'LOGS.txt'
     PERIOD = 300
 
+
     def __init__(self):
         self._queue_dict = {}
         self._queues_status = {}
