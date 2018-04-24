@@ -53,3 +53,4 @@ class ServerBaseTest(TestCase):
         self.server = subprocess.Popen(['python3', 'server.py'])
         time.sleep(0.5)
         self.assertEqual(b'YES', self.m_send(b'IN 1 ' + task_id))
+        
