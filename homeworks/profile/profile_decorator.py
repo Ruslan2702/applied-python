@@ -13,6 +13,7 @@ def profile(input):
         return input
 
 
+    all_time = 0
     @functools.wraps(input)
     def func_with_timer(*args, **kwargs):
         if getattr(input, 'status', None):
@@ -22,18 +23,20 @@ def profile(input):
         start = time.time()
         result = input(*args, **kwargs)
         stop = time.time()
+        nonlocal all_time
+        all_time += (stop - start)
         global add_class_name_to_output_str
         if getattr(input, 'status', None):
-            print(input.class_name + '.' + input.__name__ + ' finished in {0}s'.format(round((stop - start), 3)))
+            print(input.class_name + '.' + input.__name__ + ' finished in {0}s'.format(round(all_time, 3)))
         else:
-            print(input.__name__ + ' finished in {0}s'.format(round((stop - start), 3)))
+            print(input.__name__ + ' finished in {0}s'.format(round(all_time, 3)))
         return result
     return func_with_timer
 
 
 @profile
 def qoo(*args, **kwargs):
-    time.sleep(0.001)
+    time.sleep(0.5)
 
 
 @profile
@@ -50,5 +53,8 @@ class Boo:
 
 b = Boo()
 b.foo()
-qoo(2, 3)
+qoo()
 b.koo()
+qoo()
+qoo()
+qoo()
