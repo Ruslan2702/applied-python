@@ -97,7 +97,7 @@ class Queue:
 
 
 
-def listen():
+def listen(q):
     connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     connection.bind(('0.0.0.0', 5555))
@@ -146,4 +146,4 @@ def listen():
 
 if __name__ == '__main__':
     q = Queue()
-    listen()
+    listen(q)
