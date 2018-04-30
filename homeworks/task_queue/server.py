@@ -4,29 +4,27 @@ import socket
 
 
 PERIOD = 300 # 5 минут
-file_name = 'MYLOG.txt'
 
+class Saver:
+    def __init__(self, file_name):
+        self._file = file_name
 
-def write_into_file(next_id, q_all, q_status):
-    with open(file_name, 'wb') as f:
-        pickle.dump(next_id, f)
-        pickle.dump(q_all, f)
-        pickle.dump(q_status, f)
+    def write_into_file(self, obj_to_save):
+        with open(self._file, 'wb') as f:
+            pickle.dump(obj_to_save, f)
 
-def read_from_file():
-    with open(file_name, 'rb') as f:
-        next_id = pickle.load(f)
-        q_all = pickle.load(f)
-        q_status = pickle.load(f)
-    return (next_id, q_all, q_status)
+    def read_from_file(self):
+        with open(self._file, 'rb') as f:
+            load_obj = pickle.load(f)
+        return load_obj
 
 
 class Queue:
     def __init__(self):
         self._queues_dict = {}
         self._queues_status = {}
-        id_to_start = 0
-        write_into_file(id_to_start, self._queues_dict, self._queues_status)
+        self._next_id = 0
+        Saver.write_into_file(Saver('MYLOG.txt'), self)
 
     def _add_task_in_queue(self, input_list, next_id):
         queue_name = input_list[1]
@@ -70,6 +68,8 @@ class Queue:
         queue_name = input_list[1]
         id_to_check = input_list[2].decode('utf8')
         flag = False
+        if queue_name not in self._queues_dict:
+            return 'NO'
 
         for t in self._queues_dict[queue_name]:
             if t[2] == id_to_check:
@@ -97,7 +97,7 @@ class Queue:
 
 
 
-def listen():
+def listen(q, saver):
     connection = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     connection.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
     connection.bind(('0.0.0.0', 5555))
@@ -109,7 +109,7 @@ def listen():
         except KeyboardInterrupt:
             break
 
-        (next_id, q._queue_dict, q._queues_status) = read_from_file()
+        q = saver.read_from_file()
 
         input_string = current_connection.recv(2048)
         input_list = input_string.split()
@@ -119,18 +119,18 @@ def listen():
 
         command_type = input_list[0]
         if command_type == b'ADD':
-            s_num_id = str(next_id)
+            s_num_id = str(q._next_id)
             q._add_task_in_queue(input_list, s_num_id)
             current_connection.send((s_num_id).encode('utf8'))
             current_connection.close()
-            next_id += 1
-            write_into_file(next_id, q._queues_dict, q._queues_status)
+            q._next_id += 1
+            saver.write_into_file(q)
 
         elif command_type == b'GET':
             response_string = q._get_task_from_queue(input_list)
             current_connection.send(response_string.encode('utf8'))
             current_connection.close()
-            write_into_file(next_id, q._queues_dict, q._queues_status)
+            saver.write_into_file(q)
 
         elif command_type == b'IN':
             response_string = q._is_task_in_queue(input_list)
@@ -141,9 +141,11 @@ def listen():
             response_string = q._ack_task(input_list)
             current_connection.send(response_string.encode('utf8'))
             current_connection.close()
+            saver.write_into_file(q)
 
 
 
 if __name__ == '__main__':
     q = Queue()
-    listen()
+    saver = Saver('MYLOG.txt')
+    listen(q, saver)
