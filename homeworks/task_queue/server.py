@@ -121,27 +121,25 @@ def listen(q, saver):
         if command_type == b'ADD':
             s_num_id = str(q._next_id)
             q._add_task_in_queue(input_list, s_num_id)
-            current_connection.send((s_num_id).encode('utf8'))
-            current_connection.close()
             q._next_id += 1
             saver.write_into_file(q)
+            current_connection.send((s_num_id).encode('utf8'))
 
         elif command_type == b'GET':
             response_string = q._get_task_from_queue(input_list)
-            current_connection.send(response_string.encode('utf8'))
-            current_connection.close()
             saver.write_into_file(q)
+            current_connection.send(response_string.encode('utf8'))
 
         elif command_type == b'IN':
             response_string = q._is_task_in_queue(input_list)
             current_connection.send(response_string.encode('utf8'))
-            current_connection.close()
 
         elif command_type == b'ACK':
             response_string = q._ack_task(input_list)
-            current_connection.send(response_string.encode('utf8'))
-            current_connection.close()
             saver.write_into_file(q)
+            current_connection.send(response_string.encode('utf8'))
+
+        current_connection.close()
 
 
 
