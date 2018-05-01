@@ -26,7 +26,7 @@ class Queue:
         self._next_id = 0
         Saver.write_into_file(Saver('MYLOG.txt'), self)
 
-    def _add_task_in_queue(self, input_list, next_id):
+    def add_task_in_queue(self, input_list, next_id):
         queue_name = input_list[1]
         length = input_list[2].decode('utf8')
         data = input_list[3].decode('utf8')
@@ -37,7 +37,7 @@ class Queue:
             self._queues_dict[queue_name].append((length, data, next_id))
             self._queues_status[queue_name].append([True, None])
 
-    def _get_task_from_queue(self, input_list):
+    def get_task_from_queue(self, input_list):
         queue_name = input_list[1]
         if (queue_name not in self._queues_dict or len(self._queues_dict[queue_name]) == 0 or
                 not any([x[0] for x in self._queues_status[queue_name]])):
@@ -64,7 +64,7 @@ class Queue:
             self._queues_status[queue_name][idx][1] = datetime.datetime.now()
             return response_string
 
-    def _is_task_in_queue(self, input_list):
+    def is_task_in_queue(self, input_list):
         queue_name = input_list[1]
         id_to_check = input_list[2].decode('utf8')
         flag = False
@@ -79,7 +79,7 @@ class Queue:
         else:
             return 'NO'
 
-    def _ack_task(self, input_list):
+    def ack_task(self, input_list):
         queue_name = input_list[1]
         id_to_check = input_list[2].decode('utf8')
         idx = None
@@ -120,22 +120,22 @@ def listen(q, saver):
         command_type = input_list[0]
         if command_type == b'ADD':
             s_num_id = str(q._next_id)
-            q._add_task_in_queue(input_list, s_num_id)
+            q.add_task_in_queue(input_list, s_num_id)
             q._next_id += 1
             saver.write_into_file(q)
             current_connection.send((s_num_id).encode('utf8'))
 
         elif command_type == b'GET':
-            response_string = q._get_task_from_queue(input_list)
+            response_string = q.get_task_from_queue(input_list)
             saver.write_into_file(q)
             current_connection.send(response_string.encode('utf8'))
 
         elif command_type == b'IN':
-            response_string = q._is_task_in_queue(input_list)
+            response_string = q.is_task_in_queue(input_list)
             current_connection.send(response_string.encode('utf8'))
 
         elif command_type == b'ACK':
-            response_string = q._ack_task(input_list)
+            response_string = q.ack_task(input_list)
             saver.write_into_file(q)
             current_connection.send(response_string.encode('utf8'))
 
