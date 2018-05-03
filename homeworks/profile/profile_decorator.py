@@ -1,18 +1,7 @@
 import functools
 import time
 
-
-def profile(input):
-    if isinstance(input, type):
-        for attr_name in dir(input):
-            if attr_name[:2] != '__' or attr_name == '__init__':
-                attr = getattr(input, attr_name)
-                attr.status = True
-                attr.class_name = input.__name__
-                setattr(input, attr_name, profile(attr))
-        return input
-
-
+def profile_for_single_function(input):
     all_time = 0
     @functools.wraps(input)
     def func_with_timer(*args, **kwargs):
@@ -25,7 +14,6 @@ def profile(input):
         stop = time.time()
         nonlocal all_time
         all_time += (stop - start)
-        global add_class_name_to_output_str
         if getattr(input, 'status', None):
             print(input.class_name + '.' + input.__name__ + ' finished in {0}s'.format(round(all_time, 3)))
         else:
@@ -33,16 +21,27 @@ def profile(input):
         return result
     return func_with_timer
 
+def profile(input):
+    if isinstance(input, type):
+        for attr_name in dir(input):
+            if not attr_name.startswith('__') or attr_name == '__init__':
+                attr = getattr(input, attr_name)
+                attr.status = True
+                attr.class_name = input.__name__
+                setattr(input, attr_name, profile(attr))
+        return input
+
+    return profile_for_single_function(input)
+
 
 @profile
 def qoo(*args, **kwargs):
     time.sleep(0.5)
 
-
 @profile
 class Boo:
     def __init__(self):
-        time.sleep(0.001)
+        time.sleep(0.5)
 
     def foo(self):
         time.sleep(0.001)
@@ -51,10 +50,13 @@ class Boo:
         time.sleep(0.001)
 
 
-b = Boo()
-b.foo()
-qoo()
-b.koo()
-qoo()
-qoo()
-qoo()
+if __name__ == '__main__':
+    b = Boo()
+    b.foo()
+    qoo()
+    b.koo()
+    qoo()
+    qoo()
+    qoo()
+    c = Boo()
+    qoo()
